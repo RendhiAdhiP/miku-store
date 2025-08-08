@@ -3,6 +3,7 @@ const { User } = require("../models")
 const bcryptjs = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { config } = require("dotenv")
+const responseJson = require('../helpers/responseJson')
 
 exports.register = async (req, res) => {
     try {
@@ -10,15 +11,11 @@ exports.register = async (req, res) => {
         const { username, password } = req.body
 
         if (!username) {
-            return res.status(422).json({
-                message: 'username tidak boleh kosong'
-            })
+            return responseJson.error(res, "Username tidak boleh kosong", 422)
         }
 
         if (!password) {
-            return res.status(422).json({
-                message: 'password tidak boleh kosong'
-            })
+            return responseJson.error(res, "Password tidak boleh kosong", 422)
         }
 
         const exist = User.findOne({
@@ -28,9 +25,7 @@ exports.register = async (req, res) => {
         })
 
         if (exist) {
-            return res.status(400).json({
-                message: 'Username sudah ada'
-            })
+            return responseJson.error(res, "Username sudah dipakai", 400)
         }
 
         await User.create({
@@ -38,15 +33,11 @@ exports.register = async (req, res) => {
             password: bcryptjs.hashSync(password),
         })
 
-        return res.status(201).json({
-            message: 'Sign Up Berhasil'
-        })
+        return responseJson.success(res, "Register berhasil", 201)
 
     } catch (error) {
         console.error(error)
-        return res.status(500).json({
-            message: 'Internal Server Error'
-        })
+        return responseJson.internalServerError(res)
     }
 }
 
@@ -56,15 +47,11 @@ exports.login = async (req, res) => {
         const { username, password } = req.body
 
         if (!username) {
-            return res.status(422).json({
-                message: 'username tidak boleh kosong'
-            })
+            return responseJson.error(res, "Username tidak boleh kosong", 422)
         }
 
         if (!password) {
-            return res.status(422).json({
-                message: 'password tidak boleh kosong'
-            })
+            return responseJson.error(res, "Password tidak boleh kosong", 422)
         }
 
         const exsist = await User.findOne({
@@ -76,9 +63,8 @@ exports.login = async (req, res) => {
         const passwordValid = bcryptjs.compareSync(password, exsist.password)
 
         if (!passwordValid) {
-            return res.status(400).json({
-                message: 'username atau password salah'
-            })
+            return responseJson.error(res, "Username atau password salah", 400)
+
         }
 
         const token = `Bearer ` + jwt.sign({
@@ -89,16 +75,14 @@ exports.login = async (req, res) => {
             expiresIn: 7200
         })
 
-        return res.status(200).json({
+        return responseJson.successWithData(res, "Login berhasil", [{
             message: "Login Success",
             token: token
-        })
+        }], 200)
 
 
     } catch (error) {
         console.error(error)
-        return res.status(500).json({
-            message: 'Internal Server Error'
-        })
+        return responseJson.internalServerError(res)
     }
 }
