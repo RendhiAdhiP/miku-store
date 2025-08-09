@@ -3,6 +3,7 @@ const router = express.Router()
 const AuthController = require('../controllers/AuthController')
 const ProdukController = require('../controllers/ProdukController')
 const OrderController = require('../controllers/OrderController')
+const ReportController = require('../controllers/ReportController')
 const { verifyToken } = require('../middleware/verifyToken')
 const { isAdmin } = require('../middleware/isAdmin')
 
@@ -20,5 +21,7 @@ router.delete('/produk/:id', [verifyToken, isAdmin], ProdukController.delete)
 
 router.get('/order', OrderController.getAll)
 router.post('/order', verifyToken, OrderController.create)
+
+router.get('/report', [verifyToken, isAdmin], ReportController.report)
 
 module.exports = router

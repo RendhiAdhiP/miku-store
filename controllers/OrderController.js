@@ -54,6 +54,10 @@ exports.create = async (req, res) => {
             }
         })
 
+        if (!produk) {
+            return responseJson.error(res, 'Produk tidak ada')
+        }
+
         const newOrder = await Order.create({
             userId: value.userId,
             produkId: value.produkId,
@@ -61,7 +65,7 @@ exports.create = async (req, res) => {
             total_bayar: produk.harga * value.jumlah,
         })
 
-        return responseJson.successWithData(res, "Berhasil Menambahkan Produk", newOrder, 201)
+        return responseJson.successWithData(res, "Berhasil Order", newOrder, 201)
     } catch (error) {
         console.log(error)
         return responseJson.internalServerError(res)
